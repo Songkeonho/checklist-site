@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이동식 점검대차 체크리스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: auto;
+            text-align: center;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .checked {
+            text-decoration: line-through;
+            color: gray;
+        }
+        button {
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>이동식 점검대차 체크리스트</h2>
+    <input type="text" id="taskInput" placeholder="새 항목 입력">
+    <button onclick="addTask()">추가</button>
+    <ul id="taskList"></ul>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", loadTasks);
+
+        function addTask() {
+            let input = document.getElementById("taskInput");
+            let task = input.value.trim();
+            if (task === "") return;
+
+            let li = document.createElement("li");
+            li.innerHTML = `
+                <input type="checkbox" onclick="toggleTask(this)">
+                <span>${task}</span>
+                <button onclick="removeTask(this)">삭제</button>
+            `;
+            document.getElementById("taskList").appendChild(li);
+
+            saveTasks();
+            input.value = "";
+        }
+
+        function removeTask(button) {
+            button.parentElement.remove();
+            saveTasks();
+        }
+
+        function toggleTask(checkbox) {
+            let span = checkbox.nextElementSibling;
+            if (checkbox.checked) {
+                span.classList.add("checked");
+            } else {
+                span.classList.remove("checked");
+            }
+            saveTasks();
+        }
+
+        function saveTasks() {
+            let tasks = [];
+            document.querySelectorAll("#taskList li").forEach(li => {
+                let checkbox = li.querySelector("input[type='checkbox']");
+                let span = li.querySelector("span");
+                tasks.push({ text: span.textContent, checked: checkbox.checked });
+            });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.forEach(task => {
+                let li = document.createElement("li");
+                li.innerHTML = `
+                    <input type="checkbox" ${task.checked ? "checked" : ""} onclick="toggleTask(this)">
+                    <span class="${task.checked ? "checked" : ""}">${task.text}</span>
+                    <button onclick="removeTask(this)">삭제</button>
+                `;
+                document.getElementById("taskList").appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
